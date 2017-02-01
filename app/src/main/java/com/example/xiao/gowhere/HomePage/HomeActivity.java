@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.xiao.gowhere.HomePage.fragments.OfflineMapFragment;
 import com.example.xiao.gowhere.R;
 
 public class HomeActivity extends AppCompatActivity
@@ -42,6 +43,11 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if(findViewById(R.id.main_fragment_container) != null) {
+            OfflineMapFragment mapFragment = new OfflineMapFragment();
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mapFragment).commit();
+        }
     }
 
     @Override
