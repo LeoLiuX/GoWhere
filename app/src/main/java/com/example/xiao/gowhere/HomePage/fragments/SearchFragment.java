@@ -1,15 +1,20 @@
 package com.example.xiao.gowhere.HomePage.fragments;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -37,22 +42,27 @@ import java.util.Locale;
  * Created by Ricky on 2017/2/1.
  */
 
-public class SearchFragment extends Fragment implements View.OnClickListener{
+public class SearchFragment extends Fragment{
 
     private final String TAG = "SearchForHotels";
     private ArrayList<HotelItem> hotels;
+    private String selectedDate = "";
 
     View v;
-    EditText Destination, CheckInDate, CheckOutDate, Room, Adult, Child;
-    RadioButton businessButton, leisureBtn;
+    EditText CheckInDate, CheckOutDate,Destination, Room, Adult, Child;
+    RadioButton businessBtn, leisureBtn;
     Button searchBtn;
     TextView emptyResultText, radioClickError;
     RecyclerView recyclerView;
     boolean radioButtonChecked = false;
+    CalendarView calendar;
+    Dialog dialog;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        dialog = new Dialog(getActivity());
+        dialog.setCancelable(false);
         v = inflater.inflate(R.layout.fragment_search, container, false);
         hotels = new ArrayList<HotelItem>();
         initView();
@@ -67,7 +77,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener{
         Room = (EditText) v.findViewById(R.id.search_room);
         Adult = (EditText) v.findViewById(R.id.search_adult);
         Child = (EditText) v.findViewById(R.id.search_children);
-        businessButton = (RadioButton) v.findViewById(R.id.search_business);
+        businessBtn = (RadioButton) v.findViewById(R.id.search_business);
         leisureBtn = (RadioButton) v.findViewById(R.id.search_leisure);
         radioClickError = (TextView) v.findViewById(R.id.radioClickError);
         searchBtn = (Button) v.findViewById(R.id.search_button);
@@ -89,36 +99,52 @@ public class SearchFragment extends Fragment implements View.OnClickListener{
         }
         CheckInDate.setText(initDate);
         CheckOutDate.setText(initDate);
-    }
-
-
-    @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.search_checkin){
-            // show calendar
-            Toast.makeText(getContext(),"Check-in",Toast.LENGTH_SHORT).show();
-            // set check-out date
-            // return selected date
-        }
-        if(v.getId() == R.id.search_checkout){
-            // show calendar
-            Toast.makeText(getContext(),"Check-out",Toast.LENGTH_SHORT).show();
-            // set check-out date
-            // return selected date
-        }
-        if(v.getId() == R.id.search_business || v.getId() == R.id.search_leisure){
-            radioButtonChecked = true;
-            radioClickError.setVisibility(View.GONE);
-        }
-        if(v.getId() == R.id.search_button){
-            // check input info availability
-            if(infoComplete()){
-                emptyResultText.setVisibility(View.GONE);
-                sendSearchRequest();
-                recyclerView.setVisibility(View.VISIBLE);
-                // set adapter
+        // set OnClickListener
+        CheckInDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // show calendar
+                showCalendar();
+                // set check-in date
+                CheckInDate.setText(selectedDate);
             }
-        }
+        });
+        CheckOutDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // show calendar
+                showCalendar();
+                // set check-out date
+                CheckOutDate.setText(selectedDate);
+            }
+        });
+        businessBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                radioButtonChecked = true;
+                radioClickError.setVisibility(View.GONE);
+            }
+        });
+        leisureBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                radioButtonChecked = true;
+                radioClickError.setVisibility(View.GONE);
+            }
+        });
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(),"search",Toast.LENGTH_SHORT).show();
+                // check input info availability
+                if(infoComplete()){
+                    emptyResultText.setVisibility(View.GONE);
+                    sendSearchRequest();
+                    recyclerView.setVisibility(View.VISIBLE);
+                    // set adapter
+                }
+            }
+        });
     }
 
     private void sendSearchRequest() {
@@ -139,7 +165,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener{
                         item.setRating(result.getInt("hotelRating"));
                         item.setPrice(result.getInt("price"));
                         item.setImgUrl(result.getString("hotelThumb"));
-                        hotels.add(i,  item);
+                        hotels.add(i, item);
                     }
                     // notify data changes
                 } catch (JSONException e) {
@@ -189,6 +215,25 @@ public class SearchFragment extends Fragment implements View.OnClickListener{
         return completed;
     }
 
+    private void showCalendar(){
+        dialog.show();
+        dialog.setContentView(R.layout.calendar_dialog);
+        calendar = (CalendarView) dialog.findViewById(R.id.calendarView);
+        Calendar date = Calendar.getInstance();
+        calendar.setMinDate(date.getTimeInMillis()); // current date, previous dates cannot be selected
+        calendar.setDate(date.getTimeInMillis()); // current date
+        date.add(Calendar.MONTH, 6);
+        calendar.setMaxDate(date.getTimeInMillis()); // 6 months ahead
+        //Calendar.getInstance().add(Calendar.MONTH, -6);
+        calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+                selectedDate = String.format(Locale.getDefault(),"%02d/%02d/%04d",month+1, dayOfMonth, year);
+                dialog.dismiss();
+            }
+        });
+        //dialog.show();
+    }
 
 
 }

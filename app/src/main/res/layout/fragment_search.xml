@@ -58,7 +58,8 @@
                         android:clickable="true"
                         android:foreground="?android:attr/selectableItemBackground"
                         app:cardUseCompatPadding="true"
-                        android:elevation="10dp">
+                        android:elevation="10dp"
+                        android:id="@+id/checkInCard">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -86,7 +87,8 @@
                         android:clickable="true"
                         android:foreground="?android:attr/selectableItemBackground"
                         app:cardUseCompatPadding="true"
-                        android:elevation="10dp">
+                        android:elevation="10dp"
+                        android:id="@+id/checkOutCard">
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
