@@ -17,7 +17,8 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.example.xiao.gowhere.Controller.AppController;
 import com.example.xiao.gowhere.Controller.SPController;
 import com.example.xiao.gowhere.HomePage.HomeActivity;
@@ -92,23 +93,27 @@ public class LoginFragment extends Fragment {
     }
 
     private void checkLogin(){
-        JsonObjectRequest loginRequest = new JsonObjectRequest(Request.Method.GET, buildUrl(), null, new Response.Listener<JSONObject>() {
+        StringRequest loginRequest = new StringRequest(Request.Method.GET, buildUrl(), new Response.Listener<String>() {
             @Override
-            public void onResponse(JSONObject response) {
-                Log.e(TAG, response.toString());
-                try {
-                    JSONArray msgArr = response.getJSONArray("msg");
-                    try{
-                        String mobile = msgArr.getString(1);
-                        SPController.getInstance(getActivity()).setMobile(mobile);
-                        Toast.makeText(getActivity(), "Welcome Back User " + mobile, Toast.LENGTH_SHORT).show();
+            public void onResponse(String response) {
+                if(response.contains("success")){
+                    // JSONArray
+                    try {
+                        JSONArray msgArr = new JSONArray(response);
+                        JSONObject result = msgArr.getJSONObject(0);
+                        SPController.getInstance(getContext()).setName(result.getString("UserName"));
+                        SPController.getInstance(getContext()).setAddress(result.getString("UserAddress"));
+                        SPController.getInstance(getContext()).setEmail(result.getString("UserEmail"));
+                        SPController.getInstance(getContext()).setMobile(result.getString("UserMobile"));
+                        SPController.getInstance(getContext()).setPwd(inputPassword.getText().toString());
+                        Toast.makeText(getActivity(), "Welcome Back " + result.getString("UserName"), Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(getActivity(), HomeActivity.class));
-                    }catch (Exception e){
-                        Toast.makeText(getActivity(), "Login Failed. Please Try Again.", Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }catch (Exception e){
-                    e.printStackTrace();
+                } else{
+                    //JSONObject
+                    Toast.makeText(getActivity(), "Invalid mobile or password! Please Try Again.", Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() {

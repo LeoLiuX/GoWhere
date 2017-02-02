@@ -28,7 +28,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/login_mobile"
                 android:hint="Phone Number"
-                android:inputType="phone"/>
+                android:inputType="phone"
+                android:textColor="@color/colorText" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -42,7 +43,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="Password"/>
+                android:hint="Password"
+                android:textColor="@color/colorText"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
