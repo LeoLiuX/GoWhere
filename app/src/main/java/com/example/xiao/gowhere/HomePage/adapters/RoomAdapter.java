@@ -49,8 +49,8 @@ public class RoomAdapter extends RecyclerView.Adapter<RoomHolder> {
         loader.get(item.getImgUrl(), ImageLoader.getImageListener(holder.image,R.drawable.default_image,android.R.drawable.ic_dialog_alert));
         holder.image.setImageUrl(item.getImgUrl(), loader);
         holder.style.setText(item.getStyle());
-        holder.price.setText(item.getPrice());
-        holder.total.setText(night * item.getPrice());
+        holder.price.setText(String.valueOf(item.getPrice()));
+        holder.total.setText(String.valueOf(night * item.getPrice()));
         holder.bookBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

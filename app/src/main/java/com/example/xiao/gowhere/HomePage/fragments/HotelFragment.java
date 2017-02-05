@@ -1,9 +1,11 @@
 package com.example.xiao.gowhere.HomePage.fragments;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,6 +26,12 @@ import com.example.xiao.gowhere.Controller.AppController;
 import com.example.xiao.gowhere.HomePage.adapters.RoomAdapter;
 import com.example.xiao.gowhere.Model.RoomItem;
 import com.example.xiao.gowhere.R;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +43,7 @@ import java.util.ArrayList;
  * Created by Ricky on 2017/2/3.
  */
 
-public class HotelFragment extends Fragment {
+public class HotelFragment extends Fragment implements OnMapReadyCallback {
     private String TAG = "HotelFragment";
 
     private String hotel_id, hotel_name, hotel_add, hotel_image, checkInDate, checkOutDate;
@@ -51,6 +59,15 @@ public class HotelFragment extends Fragment {
     ImageLoader loader;
     RecyclerView recyclerView;
     RoomAdapter adapter;
+
+    private GoogleMap mMap;
+    private Context myContext;
+
+    @Override
+    public void onAttach(Context context) {
+        myContext= context;
+        super.onAttach(context);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +94,15 @@ public class HotelFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_hotel, container, false);
+
+        initView();
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        return v;
+    }
+
+    private void initView(){
         // init views
         HotelName = (TextView) v.findViewById(R.id.hotel_name);
         HotelAddress = (TextView) v.findViewById(R.id.hotel_address);
@@ -132,7 +158,6 @@ public class HotelFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new RoomAdapter(getActivity(), rooms, night);
         recyclerView.setAdapter(adapter);
-        return v;
     }
 
     private void sendJsonRequest(String url) {
@@ -183,5 +208,17 @@ public class HotelFragment extends Fragment {
         if (pDialog.isShowing()){
             pDialog.dismiss();
         }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng curHotel = new LatLng(hotel_lat, hotel_long);
+        mMap.addMarker(new MarkerOptions().position(curHotel).title(hotel_name));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(curHotel));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
     }
 }
