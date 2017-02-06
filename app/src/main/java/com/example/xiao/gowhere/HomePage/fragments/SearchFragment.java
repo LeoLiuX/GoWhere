@@ -176,7 +176,13 @@ public class SearchFragment extends Fragment implements AdapterCallback {
             peopleText.setText(adult+" adults");
         }
         // calculate nights
-        nightText.setText(calculateNights() + " (" + checkInDate + " - " + checkOutDate + ")");
+        String str;
+        if(dayCount>1){
+            str = dayCount+" nights";
+        }else{
+            str = dayCount+" night";
+        }
+        nightText.setText( str + " (" + checkInDate + " - " + checkOutDate + ")");
         // make a new search
         searchIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,7 +196,7 @@ public class SearchFragment extends Fragment implements AdapterCallback {
         });
     }
 
-    private String calculateNights() {
+    private int calculateNights() {
         int check_in_month = Integer.parseInt(checkInDate.substring(0,2))-1;
         int check_in_day = Integer.parseInt(checkInDate.substring(3,5));
         int check_in_year = Integer.parseInt(checkInDate.substring(6));
@@ -204,11 +210,8 @@ public class SearchFragment extends Fragment implements AdapterCallback {
         date2.clear();
         date2.set(check_out_year, check_out_month, check_out_day);
         long diff = date2.getTimeInMillis() - date1.getTimeInMillis();
-        dayCount =(int) ( diff / (24 * 60 * 60 * 1000));
-        if(dayCount>1)
-            return ("" + dayCount + " nights");
-        else
-            return ("" + dayCount + " night");
+        dayCount = (int) Math.ceil(diff / (24 * 60 * 60 * 1000));
+        return dayCount;
     }
 
     private void sendSearchRequest() {
@@ -279,8 +282,10 @@ public class SearchFragment extends Fragment implements AdapterCallback {
             radioClickError.setVisibility(View.VISIBLE);
             completed = false;
         }
-        if(dayCount<=0){
+        if(calculateNights()<=0){
             Toast.makeText(getContext(),"Check-in date must prior to Check-out date!",Toast.LENGTH_SHORT).show();
+            Log.d("dayCount", String.valueOf(dayCount));
+            completed = false;
         }
         return completed;
     }
