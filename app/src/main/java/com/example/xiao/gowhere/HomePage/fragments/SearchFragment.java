@@ -3,6 +3,7 @@ package com.example.xiao.gowhere.HomePage.fragments;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.icu.text.SimpleDateFormat;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -66,7 +67,6 @@ public class SearchFragment extends Fragment implements AdapterCallback {
     CalendarView calendar;
     Dialog dialog;
     private String checkInDate = "", checkOutDate = "";
-    private boolean checkIn = false;
     int dayCount;
 
     private ProgressDialog pDialog;
@@ -114,39 +114,22 @@ public class SearchFragment extends Fragment implements AdapterCallback {
         Room.setText("1");
         Adult.setText("2");
         Child.setText("0");
-        String initDate;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            initDate = dateFormat.format(new Date());
-        } else {
-            int month = Calendar.getInstance().get(Calendar.MONTH)+1;
-            initDate = String.format(Locale.getDefault(),"%02d/%02d/%04d",
-                    month, Calendar.getInstance().get(Calendar.DATE), Calendar.getInstance().get(Calendar.YEAR));
-        }
-        CheckInDate.setText(initDate);
-        CheckOutDate.setText(initDate);
+        int month = Calendar.getInstance().get(Calendar.MONTH)+1;
+        checkInDate = String.format(Locale.getDefault(),"%02d/%02d/%04d",month, Calendar.getInstance().get(Calendar.DATE), Calendar.getInstance().get(Calendar.YEAR));
+        checkOutDate = String.format(Locale.getDefault(),"%02d/%02d/%04d",month, Calendar.getInstance().get(Calendar.DATE)+1, Calendar.getInstance().get(Calendar.YEAR));
+        CheckInDate.setText(checkInDate);
+        CheckOutDate.setText(checkOutDate);
         // set OnClickListener
         CheckInDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // show calendar
                 showCalendar(0);
-                // set check-in date
-                // CheckInDate.setText(checkInDate);
             }
         });
         CheckOutDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(checkIn){
-                    // show calendar
-                    showCalendar(1);
-                    // set check-out date
-                    // CheckOutDate.setText(checkOutDate);
-                }
-                else {
-                    Toast.makeText(getContext(),"Please select check-in date first!",Toast.LENGTH_SHORT).show();
-                }
+                showCalendar(1);
             }
         });
         businessBtn.setOnClickListener(new View.OnClickListener() {
@@ -208,10 +191,10 @@ public class SearchFragment extends Fragment implements AdapterCallback {
     }
 
     private String calculateNights() {
-        int check_in_month = Integer.parseInt(checkInDate.substring(0,2));
+        int check_in_month = Integer.parseInt(checkInDate.substring(0,2))-1;
         int check_in_day = Integer.parseInt(checkInDate.substring(3,5));
         int check_in_year = Integer.parseInt(checkInDate.substring(6));
-        int check_out_month = Integer.parseInt(checkOutDate.substring(0,2));
+        int check_out_month = Integer.parseInt(checkOutDate.substring(0,2))-1;
         int check_out_day = Integer.parseInt(checkOutDate.substring(3,5));
         int check_out_year = Integer.parseInt(checkOutDate.substring(6));
         Calendar date1 = Calendar.getInstance();
@@ -221,7 +204,7 @@ public class SearchFragment extends Fragment implements AdapterCallback {
         date2.clear();
         date2.set(check_out_year, check_out_month, check_out_day);
         long diff = date2.getTimeInMillis() - date1.getTimeInMillis();
-        dayCount =(int) ((float) diff / (24 * 60 * 60 * 1000));
+        dayCount =(int) ( diff / (24 * 60 * 60 * 1000));
         if(dayCount>1)
             return ("" + dayCount + " nights");
         else
@@ -296,6 +279,9 @@ public class SearchFragment extends Fragment implements AdapterCallback {
             radioClickError.setVisibility(View.VISIBLE);
             completed = false;
         }
+        if(dayCount<=0){
+            Toast.makeText(getContext(),"Check-in date must prior to Check-out date!",Toast.LENGTH_SHORT).show();
+        }
         return completed;
     }
 
@@ -328,7 +314,6 @@ public class SearchFragment extends Fragment implements AdapterCallback {
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
                 switch (source){
                     case 0:
-                        checkIn = true;
                         checkInDate = String.format(Locale.getDefault(),"%02d/%02d/%04d",month+1, dayOfMonth, year);
                         CheckInDate.setText(checkInDate);
                         break;
